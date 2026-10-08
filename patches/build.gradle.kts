@@ -2,7 +2,7 @@ group = "app.cavla"
 
 patches {
     about {
-        name = "Cavla Patches for use with Morphe"
+        name = "Cavla Patches"
         description = "Cavla patches"
         source = "git@github.com:C4vla/cavla-patches.git"
         author = "C4vla"

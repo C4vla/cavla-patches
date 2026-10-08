@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "patches": [
     {
       "name": "Change package name",
@@ -48,6 +48,33 @@
       "category": null,
       "dependencies": [],
       "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Export cart",
+      "description": "Adds an Export action to the Wolt cart that saves the current cart (item, quantity, price) to a CSV file in Downloads.",
+      "default": true,
+      "category": null,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.wolt.android",
+          "name": "Wolt",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#00C2E8",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "26.40.1",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     }
   ]
