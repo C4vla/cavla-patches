@@ -16,7 +16,11 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Wolt "Export cart" extension. Fully reflective so the extension compiles against only the
@@ -96,20 +100,25 @@ public final class CartExporter {
             Object itemsObj = adapter.getClass().getMethod("getItems").invoke(adapter);
             if (!(itemsObj instanceof List)) { toast(ctx, "No cart items"); return; }
 
-            StringBuilder csv = new StringBuilder("Name,Qty,Price\n");
+            StringBuilder csv = new StringBuilder("Name,Code,Qty,Unit Price,Total\n");
             int rows = 0;
             for (Object item : (List<?>) itemsObj) {
                 if (item == null || !DISH_CLASS.equals(item.getClass().getName())) continue;
                 String name = str(call(item, "getName"));
+                String code = str(call(item, "getSchemeId"));
+                if (code.isEmpty()) code = str(call(item, "getId"));
                 String qty = str(call(item, "getCountText"));
-                String price = resolve(ctx, call(item, "getNetPriceTotalFormatted"));
-                if (price.isEmpty()) price = resolve(ctx, call(item, "getNetPriceFormatted"));
-                csv.append(csv(name)).append(',').append(csv(qty)).append(',').append(csv(price)).append('\n');
+                if (qty.isEmpty()) qty = str(call(item, "getCount"));
+                String unit = priceField(ctx, item, "getUnitPrice", "getNetPriceFormatted");
+                String total = priceField(ctx, item, "getNetPriceTotalFormatted", "getPrice");
+                csv.append(csv(name)).append(',').append(csv(code)).append(',')
+                   .append(csv(qty)).append(',').append(csv(unit)).append(',').append(csv(total)).append('\n');
                 rows++;
             }
             if (rows == 0) { toast(ctx, "Cart is empty"); return; }
 
-            String fileName = sanitize(venueName) + "-cart.csv";
+            String stamp = new SimpleDateFormat("ddMMyyyy", Locale.US).format(new Date());
+            String fileName = abbreviate(venueName) + "-" + stamp + ".csv";
             if (saveToDownloads(ctx, fileName, csv.toString())) {
                 toast(ctx, "Saved " + fileName + " to Downloads (" + rows + " items)");
             } else {
@@ -203,10 +212,36 @@ public final class CartExporter {
         return s;
     }
 
-    private static String sanitize(String s) {
-        if (s == null || s.isEmpty()) return "wolt";
-        String out = s.replaceAll("[^a-zA-Z0-9-_ ]", "").trim().replaceAll("\\s+", "_");
-        return out.isEmpty() ? "wolt" : out;
+    /** Resolve a price column: each getter may return a StringType (resolve) or a PriceModel (getPrimaryCurrency -> resolve). */
+    private static String priceField(Context ctx, Object dish, String... getters) {
+        for (String g : getters) {
+            Object v = call(dish, g);
+            if (v == null) continue;
+            String r = resolve(ctx, v);                 // StringType case
+            if (!r.isEmpty()) return r;
+            Object pc = call(v, "getPrimaryCurrency");    // PriceModel case
+            if (pc != null) {
+                r = resolve(ctx, pc);
+                if (!r.isEmpty()) return r;
+            }
+        }
+        return "";
+    }
+
+    /** First word in full + first letter of each remaining word, joined with '_'.
+     *  e.g. "KRITIKOS Agia Paraskevi" -> "KRITIKOS_AP". */
+    private static String abbreviate(String name) {
+        if (name == null) return "wolt";
+        String[] parts = name.trim().split("[^A-Za-z0-9]+");
+        ArrayList<String> words = new ArrayList<>();
+        for (String p : parts) if (!p.isEmpty()) words.add(p);
+        if (words.isEmpty()) return "wolt";
+        StringBuilder sb = new StringBuilder(words.get(0));
+        if (words.size() > 1) {
+            sb.append('_');
+            for (int i = 1; i < words.size(); i++) sb.append(words.get(i).charAt(0));
+        }
+        return sb.toString();
     }
 
     private static void toast(Context ctx, String msg) {
