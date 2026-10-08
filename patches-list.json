@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "patches": [
     {
       "name": "Change package name",
-      "description": "Appends \".cavla\" to the package name by default so the patched app installs alongside the original. Changing the package name of the app can lead to unexpected issues.",
+      "description": "Appends \".morphe\" to the package name by default so the patched app installs alongside the original. Changing the package name of the app can lead to unexpected issues.",
       "default": false,
       "category": null,
       "dependencies": [],

@@ -46,7 +46,7 @@ fun setOrGetFallbackPackageName(fallbackPackageName: String): String {
 @Suppress("unused")
 val changePackageNamePatch = resourcePatch(
     name = "Change package name",
-    description = "Appends \".cavla\" to the package name by default so the patched app installs " +
+    description = "Appends \".morphe\" to the package name by default so the patched app installs " +
             "alongside the original. Changing the package name of the app can lead to unexpected issues.",
     default = false,
 ) {
@@ -99,7 +99,7 @@ val changePackageNamePatch = resourcePatch(
             val newPackageName = if (replacementPackageName != packageNameOption.default) {
                 replacementPackageName!!
             } else {
-                "$packageName.cavla"
+                "$packageName.morphe"
             }
 
             manifest.setAttribute("package", newPackageName)
