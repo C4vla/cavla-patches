@@ -1,0 +1,7 @@
+{
+  "created_at": "2026-10-08T14:48:22",
+  "description": "Universal patches: Change package name (.cavla side-by-side install) and Enable debugging. Wolt export-cart in progress.",
+  "download_url": "https://github.com/C4vla/cavla-patches/releases/download/v0.1.0/patches-0.1.0.mpp",
+  "signature_download_url": "",
+  "version": "0.1.0"
+}
