@@ -29,3 +29,22 @@ Always produce release artifacts with `scripts/release.sh` (clean -> buildAndroi
 dex .mpp -> generatePatchesList -> restore dex .mpp). Verify: the `.mpp` must contain `classes.dex`.
 Add a source in Morphe Manager with the **repo URL** (`https://github.com/<owner>/<repo>`),
 not the `.mpp` asset URL — Manager resolves the latest release itself.
+
+## How Morphe Manager consumes a repo source (THE working recipe)
+Add source in Manager = the **repo URL** `https://github.com/<owner>/<repo>`. Manager then:
+1. reads **`patches-bundle.json`** from the repo's default branch (NOT the release, NOT `patches-list.json`),
+   which gives it `download_url` → the `.mpp`, plus `version`/`description`;
+2. downloads that `.mpp` and loads patches from its `classes.dex`.
+
+Required for recognition (all of these, learned the hard way):
+- **`patches-bundle.json` committed at repo root**, e.g.:
+  `{ "created_at","description","download_url":"https://github.com/<o>/<r>/releases/download/v<ver>/patches-<ver>.mpp","signature_download_url":"","version" }`
+- **`.mpp` contains `classes.dex`** (clean `buildAndroid`; see release.sh).
+- **`Patcher-Version` <= what Manager supports.** Manager 1.34.x works with **1.14.0** (official morphe-patches ships 1.14.0; hoo-dles 1.14.1). Template's **1.15.1 is too new -> "Unnamed / Metadata N/A"**. We pin 1.14.0.
+- Release has a **single `.mpp` asset** (no stray `patches-list.json` asset).
+- After fixing, **fully remove + re-add** the source in Manager (it caches failed entries).
+
+The official way to publish all this is the semantic-release **`release.yml`** workflow (generates
+`patches-bundle.json`/`patches-list.json` + release). We currently do it manually via `scripts/release.sh`
++ a hand-written `patches-bundle.json`; wiring release.yml later needs a `read:packages` PAT secret
+(CI's default GITHUB_TOKEN can't read MorpheApp's private registry).
