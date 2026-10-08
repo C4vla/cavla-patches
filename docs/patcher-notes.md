@@ -19,3 +19,13 @@
 ## Patch inventory (universal / all)
 - `all/manifest/packagename/ChangePackageNamePatch` — appends `.cavla` to package (side-by-side install). Options: packageName, updatePermissions, updateProviders. For side-by-side of apps with content providers (likely Wolt), enable **updateProviders** (and often updatePermissions) at apply time or install fails on duplicate authorities.
 - `all/manifest/debug/EnableDebugPatch` — sets `android:debuggable=true`.
+
+## Releasing a bundle Morphe Manager can load (IMPORTANT)
+Morphe Manager runs on Android and loads patches from **`classes.dex`** inside the `.mpp`.
+A dexless bundle shows **"Unnamed / Metadata N/A"** and won't apply.
+- `buildAndroid` only merges `classes.dex` on a **clean** build (incremental builds skip it).
+- `generatePatchesList` rebuilds the `.mpp` **without** `classes.dex`.
+Always produce release artifacts with `scripts/release.sh` (clean -> buildAndroid -> stash
+dex .mpp -> generatePatchesList -> restore dex .mpp). Verify: the `.mpp` must contain `classes.dex`.
+Add a source in Morphe Manager with the **repo URL** (`https://github.com/<owner>/<repo>`),
+not the `.mpp` asset URL — Manager resolves the latest release itself.
